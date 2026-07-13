@@ -13,6 +13,7 @@ client=Groq(api_key=my_api_key)
 
 model="llama-3.3-70b-versatile"
 
+file = open("history.txt", "a")
 
 # #Take input from user
 role1="user"
@@ -44,3 +45,8 @@ while True:
 
     print(answer)
 
+    file.write("You: " +prompt + "\n")
+    file.write("Ai: " +answer + "\n")
+    file.write("-" * 70 + "\n")
+
+file.close()     
