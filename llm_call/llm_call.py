@@ -20,13 +20,13 @@ model="llama-3.3-70b-versatile"
 role1="user"
 
 #prompt
-content1="Who is Hitman?"
+prompt="Who is Hitman?"
 
 #Creating a message (using dictionary)
 #needs role and content
 message={
     "role":role1,
-    "content":content1
+    "content":prompt
 }
  
 #making a list
