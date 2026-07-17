@@ -1,33 +1,55 @@
 import os
-from pathlib import Path                   
-from dotenv import load_dotenv     
-from groq import Groq                
-load_dotenv()          
-from pydantic import BaseModel   
+from dotenv import load_dotenv
+from groq import Groq
+from pydantic import BaseModel
+from pypdf import PdfReader
 
-my_api_key=os.getenv("GROQ_API_KEY")
+# ==========================
+# Load Environment Variables
+# ==========================
+load_dotenv()
 
-if not my_api_key:
-    raise ValueError("Where Api Key? ")
+api_key = os.getenv("GROQ_API_KEY")
 
-client=Groq(api_key=my_api_key)
+if not api_key:
+    raise ValueError("GROQ_API_KEY not found!")
 
-model="llama-3.3-70b-versatile"
+client = Groq(api_key=api_key)
 
-role="user"
+MODEL = "llama-3.3-70b-versatile"
 
+# ==========================
+# Pydantic Schema
+# ==========================
 class Student(BaseModel):
-    experience :str
-    skills: list[str]
+    experience: str | None
+    skills: list[str] | None
+
+schema = Student.model_json_schema()
+
+# ==========================
+# Read Resume PDF
+# ==========================
+def read_resume(pdf_path: str) -> str:
+    reader = PdfReader(pdf_path)
+
+    resume_text = ""
+
+    for page in reader.pages:
+        text = page.extract_text()
+
+        if text:
+            resume_text += text + "\n"
+
+    return resume_text
 
 
-schema=Student.model_json_schema()
+# ==========================
+# Extract Resume Information
+# ==========================
+def extract_resume_info(resume_text: str):
 
-response_format={
-    "type":"json_object"
-}
-
-system_prompt=f"""
+    system_prompt = f"""
 You are an HR assistant.
 
 Extract the information according to this JSON schema:
@@ -35,39 +57,65 @@ Extract the information according to this JSON schema:
 {schema}
 
 Return ONLY valid JSON.
+
+If any field is missing, return null.
 """
 
-message_system={
-    "role":"system",
-    "content":system_prompt
-}
+    messages = [
+        {
+            "role": "system",
+            "content": system_prompt
+        },
+        {
+            "role": "user",
+            "content": f"""
+This is a student's resume.
 
-resume_text=f"""
-Abhishek Ainapure
+Extract ONLY the experience and skills.
 
-Python
+Resume:
 
-SQL
-
-Machine Learning
-
-Database Intern
-
-B.Tech AI & DS
+{resume_text}
 """
+        }
+    ]
 
-prompt=f"""
-this is student resume extract the experince an skills from this {resume_text}
-"""
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=messages,
+        temperature=0,
+        response_format={"type": "json_object"}
+    )
 
-message={
-    "role":role,
-    "content":prompt
-}
+    return response.choices[0].message.content
 
-messages=[message_system,message]
 
-response=client.chat.completions.create(model=model,messages=messages,temperature=0,response_format=response_format)
+# ==========================
+# Main Function
+# ==========================
+def main():
 
-answer=response.choices[0].message.content
-print(answer)
+    pdf_file = "Resume (AIML).pdf"
+
+    print("=" * 50)
+    print("Reading Resume...")
+    print("=" * 50)
+
+    resume_text = read_resume(pdf_file)
+
+    print(resume_text)
+
+    print("\n" + "=" * 50)
+    print("Extracting Information...")
+    print("=" * 50)
+
+    result = extract_resume_info(resume_text)
+
+    print(result)
+
+
+# ==========================
+# Run Program
+# ==========================
+if __name__ == "__main__":
+    main()
