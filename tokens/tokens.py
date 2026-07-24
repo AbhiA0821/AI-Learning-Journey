@@ -44,7 +44,7 @@ response=client.chat.completions.create(model=model,messages=messages ,max_token
 usage=response.usage
 
 #printing tockens
-
+print("done")
 print(f"prompt:{prompt} --> your tokens:{usage.prompt_tokens} completion tokens:{usage.completion_tokens} total tokens:{usage.total_tokens}")
 # print(response)
 
