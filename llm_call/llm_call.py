@@ -40,7 +40,7 @@ print(response)
 
 print("-----------------------------------------------------------------------------")
 
-
+print("ok")
 #Print main answer
 
 answer=response.choices[0].message.content
