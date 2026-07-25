@@ -112,7 +112,7 @@ def main():
     result = extract_resume_info(resume_text)
 
     print(result)
-
+print("ok")
 
 # ==========================
 # Run Program
