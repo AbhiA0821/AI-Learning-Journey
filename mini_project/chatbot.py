@@ -9,6 +9,8 @@ from fastapi import FastAPI
 app=FastAPI()
 
 @app.get("/")
+
+#creating home page section to see on home page fter we go to link.
 def home():
     return{
         "message":"Abhi is learninig"
@@ -16,7 +18,19 @@ def home():
 
 #pdf extraction for resume
 
+def read_pdf(file_path: Path):
 
+    reader = PdfReader(file_path)
+
+    text= ""
+
+    for page in reader.pages:
+        page_text = page.extract_text()
+
+        if page_text:
+            text += page_text + "\n"
+
+    return text        
 
 
 
