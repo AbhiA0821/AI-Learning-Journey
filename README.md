@@ -13,4 +13,4 @@
 ### ✅ Day 4
 - Resume Information Extractor
 - Structured JSON Output
-- Pydantic Models
+- Pydantic Models....
